@@ -1,0 +1,160 @@
+---
+title: "Sustainability Analysis in Trail Running Events"
+author: "Cristi M."
+date: "2025-06"
+format: html
+editor: visual
+---
+
+## 🧭 Working Directory in R
+
+R needs to know *where* to look for your data files and *where* to save output. This location is your **working directory**.
+
+- `getwd()` shows your current directory.
+- `setwd("your/path")` changes it.
+
+> ✅ Tip: Always set it at the start of your project.
+
+```{r}
+getwd()
+#setwd("D:/proiecte cristi/Prezentari Internationale/SES TRAIL/data for trail running")
+```
+
+---
+
+## 📦 Packages for Trail Running Sustainability Analysis
+
+We use different file types:
+- **Text** (event descriptions & regulations)
+- **ZIP** (compressed datasets)
+- **Spatial** (GPX, shapefiles)
+
+### Text Packages
+
+| Package      | Use                                                  |
+|--------------|------------------------------------------------------|
+| `readtext`   | Read `.txt`, `.docx`, `.pdf` into data frames        |
+| `tm`         | Text mining & preprocessing                          |
+| `SnowballC`  | Word stemming                                        |
+
+### ZIP Utilities
+
+- `unzip()` → extract zip content
+- `list.files()` → list all files inside folders
+
+### Spatial Packages
+
+| Package   | Purpose                                                  |
+|-----------|----------------------------------------------------------|
+| `sf`      | Handle spatial vector data                               |
+| `tmap`    | Thematic mapping                                         |
+| `leaflet` | Interactive maps                                         |
+| `raster`  | Work with elevation/imagery (optional)                   |
+
+```{r}
+# install.packages(c("readtext", "tidytext", "stopwords", "wordcloud", "RColorBrewer"))
+```
+
+---
+
+## 📚 What Is an R Package?
+
+An **R package** is a toolbox of functions, data, and documentation.  
+Think of them as extensions to R.
+
+### Example
+
+```{r}
+# install.packages("sf")    # Do this once
+library(sf)               # Load in every session
+```
+
+---
+
+## 🔓 Load and Process Text Data from ZIP
+
+```{r}
+# Step 1: Select zip file interactively
+zip_path <- file.choose()
+
+# Step 2: Unzip to folder (preserve subfolders)
+unzip(zip_path, exdir = "unzipped_data")
+
+# Step 3: List all .txt and .docx files recursively
+text_files <- list.files("unzipped_data", pattern = regex("\.(txt|docx)$"),
+                         recursive = TRUE, full.names = TRUE)
+
+# Step 4: Keep only valid files
+text_files <- text_files[file.exists(text_files)]
+
+# Step 5: Load texts
+library(readtext)
+text_data <- readtext(text_files)
+
+# Step 6: Preview
+head(text_data)
+```
+
+---
+
+## 🧹 Text Cleaning and Tokenization
+
+```{r}
+library(dplyr)
+library(tidytext)
+library(stringr)
+library(stopwords)
+
+# Step 1: Break into words
+tidy_text <- text_data %>%
+  select(doc_id, text) %>%
+  unnest_tokens(word, text)
+
+# Step 2: Remove Romanian stopwords, numbers, short words
+romanian_stopwords <- stopwords("ro")
+
+tidy_text <- tidy_text %>%
+  filter(!word %in% romanian_stopwords) %>%
+  filter(!str_detect(word, "^[0-9]+$")) %>%
+  filter(str_length(word) > 2)
+
+# Step 3: Preview
+head(tidy_text)
+```
+
+---
+
+## ☁️ Generate a Word Cloud
+
+```{r}
+library(wordcloud)
+library(RColorBrewer)
+
+# Word frequency
+word_freq <- tidy_text %>%
+  count(word, sort = TRUE)
+
+# Preview top 10
+head(word_freq, 10)
+
+# Word cloud
+set.seed(1234)
+wordcloud(words = word_freq$word,
+          freq = word_freq$n,
+          min.freq = 2,
+          max.words = 150,
+          random.order = FALSE,
+          rot.per = 0.25,
+          colors = brewer.pal(8, "Dark2"))
+```
+
+---
+
+## ✅ Summary
+
+- Load ZIP with `.docx` or `.txt` content
+- Clean, tokenize and remove stopwords
+- Visualize word importance with a cloud
+
+🎯 Next: Analyze **regulations** or **map GPX routes** using `sf`.
+

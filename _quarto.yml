@@ -1,0 +1,10 @@
+project:
+  type: website
+
+website:
+  title: "Sustainability in Trail Running"
+  navbar: false
+
+format:
+  html:
+    theme: cosmo
