@@ -65,8 +65,8 @@ Think of them as extensions to R.
 ### Example
 
 ```{r}
-# install.packages("sf")    # Do this once
-library(sf)               # Load in every session
+# install.packages("sf")    
+library(sf)
 ```
 
 ---
@@ -81,7 +81,7 @@ zip_path <- file.choose()
 unzip(zip_path, exdir = "unzipped_data")
 
 # Step 3: List all .txt and .docx files recursively
-text_files <- list.files("unzipped_data", pattern = regex("\.(txt|docx)$"),
+text_files <- list.files("unzipped_data", pattern = regex("\\.(txt|docx)$"),
                          recursive = TRUE, full.names = TRUE)
 
 # Step 4: Keep only valid files
@@ -157,4 +157,3 @@ wordcloud(words = word_freq$word,
 - Visualize word importance with a cloud
 
 🎯 Next: Analyze **regulations** or **map GPX routes** using `sf`.
-
